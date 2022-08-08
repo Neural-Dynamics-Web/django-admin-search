@@ -17,7 +17,7 @@ def advanced_search_form(context, cl):  # pylint: disable=invalid-name
     context = {
         'show_result_count': cl.result_count != cl.full_result_count,
         'fieldsets': context['fieldsets'],
-        'search_var': SEARCH_VAR
+        'search_var': SEARCH_VAR,
         'form': context['form'],
         'cl': cl,
     }
