@@ -33,9 +33,14 @@ class AdvancedSearchAdmin(ModelAdmin):
         """
         if hasattr(self, 'search_form'):
             self.advanced_search_fields = {}
-            self.search_form_data = self.search_form(request.GET)  # pylint: disable=no-member
+
+            initialized_form = self.search_form(request.GET)
             self.extract_advanced_search_terms(request.GET)
-            extra_context = {'asf': self.search_form_data}
+            self.search_form_data = initialized_form
+
+            fieldsets = getattr(initialized_form, 'fieldsets', [])
+            extra_context = {'form': initialized_form,
+                             'fieldsets': fieldsets}
 
         return super().changelist_view(request, extra_context=extra_context)
 
