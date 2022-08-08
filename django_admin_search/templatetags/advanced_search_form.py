@@ -15,11 +15,11 @@ def advanced_search_form(context, cl):  # pylint: disable=invalid-name
         return ''
 
     context = {
-        # 'show_result_count': cl.result_count != cl.full_result_count,
-        # 'fieldsets': context['fieldsets'],
-        # 'search_var': SEARCH_VAR,
-        # 'form': context['form'],
-        # 'cl': cl,
+        'show_result_count': cl.result_count != cl.full_result_count,
+        'fieldsets': context['fieldsets'],
+        'search_var': SEARCH_VAR,
+        'form': context['form'],
+        'cl': cl,
     }
 
     return render_to_string('admin/custom_search_form.html', context)
