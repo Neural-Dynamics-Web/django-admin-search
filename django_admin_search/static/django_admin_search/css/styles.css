@@ -1,18 +1,14 @@
-.form-field input[type=text],
-.form-field input[type=password],
-.form-field input[type=email],
-.form-field input[type=url],
-.form-field input[type=tel],
-.form-field input[type=number],
-.form-field textarea,
-.form-field select,
-.form-field .vTextField {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 6px 8px;
-    min-height: 36px;
-    font-size: 14px;
-    width: 100%;
+form input[type="text"],
+form input[type="email"],
+form input[type="tel"],
+form input[type="url"],
+form input[type="password"],
+form input[type="search"] {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    margin-bottom: 10px;
+    width: calc(100% - 22px); /* Adjusting for padding and border */
 }
 
 .aligned label {
@@ -24,12 +20,9 @@
     line-height: 1;
 }
 
-.advanced_search_form_body>input {
-    margin-bottom: 15px;
-}
-
-.advanced_search_form_body>select {
-    margin-bottom: 15px;
+#advanced_admin_search {
+    max-height: 80%;
+    width: 100%;
 }
 
 .form_submit_button {
@@ -44,13 +37,14 @@
 }
 
 .search_button {
+    padding-left: 8px;
     padding-top: 10px;
     margin-bottom: 20px;
 }
 
 .search_button>a {
     background-image: none!important;
-    padding: 9px 20px 9px 20px !important;
+    padding: 9px 33px 9px 32px !important;
     border-radius: 3px!important;
     color: #454545!important;
     font-size: 16px!important;
