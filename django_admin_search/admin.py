@@ -4,7 +4,7 @@ from django.contrib.admin import ModelAdmin
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
-
+from django import forms
 from django_admin_search import utils
 
 
@@ -34,12 +34,11 @@ class AdvancedSearchAdmin(ModelAdmin):
         if hasattr(self, 'search_form'):
             self.advanced_search_fields = {}
 
-            initialized_form = self.search_form(request.GET)
+            self.search_form_data = self.search_form(dict(request.GET))
             self.extract_advanced_search_terms(request.GET)
-            self.search_form_data = initialized_form
 
-            fieldsets = getattr(initialized_form, 'fieldsets', [])
-            extra_context = {'form': initialized_form,
+            fieldsets = getattr(self.search_form_data, 'fieldsets', [])
+            extra_context = {'form': self.search_form_data,
                              'fieldsets': fieldsets}
 
         return super().changelist_view(request, extra_context=extra_context)
@@ -58,12 +57,15 @@ class AdvancedSearchAdmin(ModelAdmin):
 
         request._mutable = False  # pylint: disable=W0212
 
-    def get_request_field_value(self, field):
+    def get_request_field_value(self, field, form_field):
         """
             check if field has value passed on request
         """
         if field in self.advanced_search_fields:
-            return True, self.advanced_search_fields[field][0]
+            if isinstance(form_field, (forms.ModelMultipleChoiceField,)):
+                return True, self.advanced_search_fields[field]
+            else:
+                return True, self.advanced_search_fields[field][0]
 
         return False, None
 
@@ -75,7 +77,7 @@ class AdvancedSearchAdmin(ModelAdmin):
         if has_field_value:
             field_name = form_field.widget.attrs.get('filter_field', field)
             field_filter = field_name + form_field.widget.attrs.get('filter_method', '')
-
+            
             try:
                 field_value = utils.format_data(form_field, field_value)  # format by field type
                 return Q(**{field_filter: field_value})
@@ -109,7 +111,7 @@ class AdvancedSearchAdmin(ModelAdmin):
             return query
 
         for field, form_field in self.search_form_data.fields.items():
-            has_field_value, field_value = self.get_request_field_value(field)
+            has_field_value, field_value = self.get_request_field_value(field, form_field)
             query &= self.get_field_value(field, form_field, field_value, has_field_value, request)
 
         return query
