@@ -6,6 +6,51 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django import forms
 from django_admin_search import utils
+from django.contrib.admin.views.main import ChangeList
+
+
+class AdvancedSearchChangeList(ChangeList):
+    def __init__(
+            self,
+            request,
+            model,
+            list_display,
+            list_display_links,
+            list_filter,
+            date_hierarchy,
+            search_fields,
+            list_select_related,
+            list_per_page,
+            list_max_show_all,
+            list_editable,
+            model_admin,
+            sortable_by,
+            search_help_text,
+        ):
+        # ? Get our advanced_search_fields and store them inside
+        # ? ChangeList class so we can use them in the future
+        # ? for adding into generated links for pagination,
+        # ? sorting and .etc
+        self.custom_filters = model_admin.advanced_search_fields
+        
+        super().__init__(request, model, list_display, list_display_links, list_filter, date_hierarchy, search_fields, list_select_related, list_per_page, list_max_show_all, list_editable, model_admin, sortable_by, search_help_text)
+
+    def get_query_string(self, new_params=None, remove=None):
+        # ? Let Django make his work so we can make our
+        query_string = super().get_query_string(new_params, remove)
+
+        # ? Append additional parameters to the result
+        # ? query so we can handle sorting, pagination
+        # ? and .etc without breaking Django 
+        # ? core functionality
+        for key, value in self.custom_filters.items():
+            if isinstance(value, list):
+                for subvalue in value:
+                    query_string += f"&{key}={subvalue}"
+            else:
+                query_string += f"&{key}={value}"
+        
+        return query_string
 
 
 class AdvancedSearchAdmin(ModelAdmin):
@@ -115,3 +160,6 @@ class AdvancedSearchAdmin(ModelAdmin):
             query &= self.get_field_value(field, form_field, field_value, has_field_value, request)
 
         return query
+
+    def get_changelist(self, request, **kwargs):
+        return AdvancedSearchChangeList
