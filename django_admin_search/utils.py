@@ -18,7 +18,7 @@ def format_data(value, key_value):
         # see a ticket https://code.djangoproject.com/ticket/31049
         result = bool(key_value)
 
-    elif isinstance(value, forms.ModelMultipleChoiceField):
+    elif isinstance(value, (forms.ModelMultipleChoiceField, forms.MultipleChoiceField)):
         result = key_value
 
     else:
