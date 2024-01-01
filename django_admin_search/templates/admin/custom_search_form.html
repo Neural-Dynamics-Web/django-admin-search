@@ -9,7 +9,6 @@
 {% block modal %}
 
  <form id="advanced_admin_search" class="modal" style="display: none;">
-        
         <div class="advanced_search_form_body">
             {% block form_fields %}
                 {% include "admin/custom_fieldset.html" %}
@@ -17,10 +16,23 @@
         </div>
 
         {% if show_result_count %}
-            <span class="small quiet">{% blocktrans count counter=cl.result_count %}{{ counter }} result{% plural %}{{ counter }} 
-                                      results{% endblocktrans %} (<a href="?{% if cl.is_popup %}_popup=1{% endif %}">
-                                      {% if cl.show_full_result_count %}{% blocktrans with full_result_count=cl.full_result_count %}
-                                      {{ full_result_count }} total{% endblocktrans %}{% else %}{% trans "Show all" %}{% endif %}</a>)
+            <span class="small quiet">
+                {% blocktrans count counter=cl.result_count %}
+                    {{ counter }}
+                        result{% plural %}
+                    {{ counter }} 
+                        results
+                {% endblocktrans %} 
+                (<a href="?{% if cl.is_popup %}_popup=1{% endif %}">
+                    {% if cl.show_full_result_count %}
+                        {% blocktrans with full_result_count=cl.full_result_count %}
+                            {{ full_result_count }} total
+                        {% endblocktrans %}
+                    {% else %}
+                        {% trans "Show all" %}
+                    {% endif %}
+                </a>
+                )
             </span>
         {% endif %}
         {% for pair in cl.params.items %}
@@ -74,25 +86,18 @@
         page = page == null ? 0 : ( $.isNumeric(page) ? parseInt(page) : 0 );
         
         $( "#advanced_admin_search" ).submit(function() {
-            $('#advanced_admin_search input').each(function(k, v) {
-                v.disabled = v.value === '';
-            });
+            /* Clear all empty values from form */
+            var params = $(this).find(":input").filter(function () {
+                return $.trim(this.value).length > 0
+            }).serialize();
             
-            params = $('#advanced_admin_search').serialize()
-
-            /* 
-                
-                after apply filter is more common to leave user to the first page
-                because a data length is changed, current page may no longer exist 
-                (Ex, filter return empty queryset, nos has second page).
-                but if your need to keep a page, uncomment this
-                if (page != 0) { // this main current page
-                    // params = 'p=' + page + '&' + params;
-                }
-            */
             
             href = window.location.pathname
-            window.location.href = href + '?' + params;
+            if (params) {
+                window.location.href = href + '?' + params;
+            } else {
+                window.location.href = href
+            }
             return false;
         });
     </script>
