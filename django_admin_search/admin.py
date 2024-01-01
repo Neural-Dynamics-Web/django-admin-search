@@ -7,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from django import forms
 from django_admin_search import utils
 from django.contrib.admin.views.main import ChangeList
+import django
 
 
 class AdvancedSearchChangeList(ChangeList):
@@ -66,6 +67,7 @@ class AdvancedSearchAdmin(ModelAdmin):
             override django admin 'get_queryset'
         """
         queryset = super().get_queryset(request)
+
         try:
             return queryset.filter(self.advanced_search_query(request))
         except Exception:  # pylint: disable=broad-except
@@ -79,7 +81,12 @@ class AdvancedSearchAdmin(ModelAdmin):
         if hasattr(self, 'search_form'):
             self.advanced_search_fields = {}
 
-            self.search_form_data = self.search_form(dict(request.GET))
+            # ? Ensure that all the values from the QueryDict will be parsed correctly 
+            # ? is case we have keys that have multiple values inside and this way 
+            # ? we will not break Django Form functionality
+            self.search_form_data = self.search_form(
+                django.utils.datastructures.MultiValueDict(request.GET)
+            )
             self.extract_advanced_search_terms(request.GET)
 
             fieldsets = getattr(self.search_form_data, 'fieldsets', [])
