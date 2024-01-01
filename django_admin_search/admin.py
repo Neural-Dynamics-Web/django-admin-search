@@ -107,7 +107,7 @@ class AdvancedSearchAdmin(ModelAdmin):
             check if field has value passed on request
         """
         if field in self.advanced_search_fields:
-            if isinstance(form_field, (forms.ModelMultipleChoiceField,)):
+            if isinstance(form_field, (forms.ModelMultipleChoiceField, forms.MultipleChoiceField)):
                 return True, self.advanced_search_fields[field]
             else:
                 return True, self.advanced_search_fields[field][0]
