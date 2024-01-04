@@ -172,27 +172,6 @@ class AdvancedSearchAdmin(
         return False, None
 
 
-    def get_queryset(self, 
-            request: django.http.HttpRequest
-        ) -> django.db.models.QuerySet:
-        queryset = super().get_queryset(request=request)
-
-        try:
-            # ? Filter our queryset object with provided 
-            # ? filter options from the form
-            filters = self.advanced_search_query(request=request)
-            return queryset.filter(filters)
-        
-        except Exception:
-            django.contrib.messages.add_message(
-                level=django.contrib.messages.ERROR, 
-                message="Filter was not applied",
-                request=request
-            )
-
-            return queryset.none()
-
-
     def extract_advanced_search_terms(self, 
             request: django.http.HttpRequest
         ) -> django.http.HttpRequest:
@@ -217,7 +196,11 @@ class AdvancedSearchAdmin(
             has_field_value: bool, 
             field: typing.AnyStr, 
         ) -> django.db.models.Q:
-        if hasattr(self, ('search_' + field)):
+        # ? Get custom defined filtering rule if
+        #? it exists for the appropriate field
+        function = getattr(self, "search_" + field, None)
+
+        if function:
             kwargs = {
                 "param_values": self.advanced_search_fields,
                 "field_value": field_value,
@@ -225,7 +208,8 @@ class AdvancedSearchAdmin(
                 "request": request,
                 "field": field,
             }
-            return getattr(self, 'search_' + field)(**kwargs)
+
+            return function(**kwargs)
 
         return self.get_field_value_default(
             has_field_value=has_field_value, 
@@ -234,6 +218,30 @@ class AdvancedSearchAdmin(
             request=request,
             field=field
         )
+
+
+    def get_queryset(self, 
+            request: django.http.HttpRequest
+        ) -> django.db.models.QuerySet:
+        queryset = super().get_queryset(request=request)
+
+        try:
+            # ? Filter our queryset object with provided 
+            # ? filter options from the form
+            filters = self.advanced_search_query(
+                request=request
+            )
+            
+            return queryset.filter(filters)
+        
+        except Exception:
+            django.contrib.messages.add_message(
+                level=django.contrib.messages.ERROR, 
+                message="Filter was not applied",
+                request=request
+            )
+
+            return queryset.none()
 
 
     def advanced_search_query(self,
