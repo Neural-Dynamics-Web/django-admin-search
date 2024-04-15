@@ -32,7 +32,7 @@ class AdvancedSearchChangeList(ChangeList):
             list_editable,
             model_admin,
             sortable_by,
-            search_help_text,
+            search_help_text: str = "",
         ):
         # ? Get our advanced_search_fields and store them inside
         # ? ChangeList class so we can use them in the future
